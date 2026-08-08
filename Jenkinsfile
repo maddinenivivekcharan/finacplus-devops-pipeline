@@ -26,20 +26,28 @@ pipeline {
     stage('Validate Parameters') {
       steps {
         script {
-          if (params.PUSH_IMAGE && params.IMAGE_REGISTRY == 'registry.example.com') {
+          env.EFFECTIVE_IMAGE_REGISTRY = (params.IMAGE_REGISTRY ?: 'registry.example.com').trim()
+          env.EFFECTIVE_IMAGE_REPOSITORY = (params.IMAGE_REPOSITORY ?: 'finacplus/devops-pipeline').trim()
+          env.EFFECTIVE_K8S_NAMESPACE = (params.K8S_NAMESPACE ?: 'finacplus-devops').trim()
+          env.EFFECTIVE_KUSTOMIZE_OVERLAY = (params.KUSTOMIZE_OVERLAY ?: 'dev').trim()
+
+          if (params.PUSH_IMAGE && env.EFFECTIVE_IMAGE_REGISTRY == 'registry.example.com') {
             error('PUSH_IMAGE requires IMAGE_REGISTRY to be set to a real registry reachable by Kubernetes.')
           }
           if (params.DEPLOY_TO_K8S && !params.PUSH_IMAGE) {
             error('DEPLOY_TO_K8S requires PUSH_IMAGE=true so the target cluster can pull the image built by this run.')
           }
-          if (!(params.IMAGE_REGISTRY ==~ /^[A-Za-z0-9][A-Za-z0-9._:-]*$/)) {
+          if (!(env.EFFECTIVE_IMAGE_REGISTRY ==~ /^[A-Za-z0-9][A-Za-z0-9._:-]*$/)) {
             error('IMAGE_REGISTRY contains unsupported characters.')
           }
-          if (!(params.IMAGE_REPOSITORY ==~ /^[a-z0-9][a-z0-9._\/-]*$/)) {
+          if (!(env.EFFECTIVE_IMAGE_REPOSITORY ==~ /^[a-z0-9][a-z0-9._\/-]*$/)) {
             error('IMAGE_REPOSITORY must use lowercase registry path characters only.')
           }
-          if (!(params.K8S_NAMESPACE ==~ /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/)) {
+          if (!(env.EFFECTIVE_K8S_NAMESPACE ==~ /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/)) {
             error('K8S_NAMESPACE must be a valid Kubernetes namespace name.')
+          }
+          if (!(env.EFFECTIVE_KUSTOMIZE_OVERLAY in ['dev', 'prod'])) {
+            error('KUSTOMIZE_OVERLAY must be dev or prod.')
           }
         }
       }
@@ -50,7 +58,7 @@ pipeline {
         checkout scm
         script {
           env.GIT_SHA = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
-          env.IMAGE_TAG = "${params.IMAGE_REGISTRY}/${params.IMAGE_REPOSITORY}:${env.GIT_SHA}"
+          env.IMAGE_TAG = "${env.EFFECTIVE_IMAGE_REGISTRY}/${env.EFFECTIVE_IMAGE_REPOSITORY}:${env.GIT_SHA}"
         }
       }
     }
@@ -74,7 +82,7 @@ pipeline {
           . .venv/bin/activate
           python scripts/validate_k8s.py
           python scripts/validate_jenkinsfile.py Jenkinsfile
-          kubectl kustomize k8s/overlays/${KUSTOMIZE_OVERLAY} >/tmp/rendered.yaml
+          kubectl kustomize k8s/overlays/${EFFECTIVE_KUSTOMIZE_OVERLAY} >/tmp/rendered.yaml
         '''
       }
     }
@@ -99,7 +107,7 @@ pipeline {
             }
           } else {
             sh '''
-              echo "Pushing to no-auth registry ${IMAGE_REGISTRY}"
+              echo "Pushing to no-auth registry ${EFFECTIVE_IMAGE_REGISTRY}"
               docker push "${IMAGE_TAG}"
             '''
           }
@@ -112,14 +120,14 @@ pipeline {
       steps {
         withCredentials([file(credentialsId: env.KUBECONFIG_CREDENTIALS_ID, variable: 'KUBECONFIG')]) {
           sh '''
-            kubectl create namespace "${K8S_NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
-            kubectl kustomize "k8s/overlays/${KUSTOMIZE_OVERLAY}" >/tmp/rendered.yaml
+            kubectl create namespace "${EFFECTIVE_K8S_NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
+            kubectl kustomize "k8s/overlays/${EFFECTIVE_KUSTOMIZE_OVERLAY}" >/tmp/rendered.yaml
             . .venv/bin/activate
             python scripts/set_image.py /tmp/rendered.yaml "${APP_NAME}" "${IMAGE_TAG}" "${GIT_SHA}" >/tmp/rendered-with-image.yaml
-            python scripts/set_namespace.py /tmp/rendered-with-image.yaml "${K8S_NAMESPACE}" >/tmp/rendered-final.yaml
-            kubectl -n "${K8S_NAMESPACE}" apply -f /tmp/rendered-final.yaml
-            kubectl -n "${K8S_NAMESPACE}" rollout status deployment/${APP_NAME} --timeout=120s
-            kubectl -n "${K8S_NAMESPACE}" get deploy,svc,hpa
+            python scripts/set_namespace.py /tmp/rendered-with-image.yaml "${EFFECTIVE_K8S_NAMESPACE}" >/tmp/rendered-final.yaml
+            kubectl -n "${EFFECTIVE_K8S_NAMESPACE}" apply -f /tmp/rendered-final.yaml
+            kubectl -n "${EFFECTIVE_K8S_NAMESPACE}" rollout status deployment/${APP_NAME} --timeout=120s
+            kubectl -n "${EFFECTIVE_K8S_NAMESPACE}" get deploy,svc,hpa
           '''
         }
       }
