@@ -110,6 +110,21 @@ kubectl apply --dry-run=server -k k8s/overlays/dev
 
 ## F. Run Kubernetes Locally
 
+Example with Docker Desktop Kubernetes:
+
+```powershell
+$sha = git rev-parse HEAD
+docker build --build-arg BUILD_SHA=$sha -t finacplus-devops-pipeline:local .
+docker save finacplus-devops-pipeline:local -o $env:TEMP\finacplus-devops-pipeline-local.tar
+docker cp $env:TEMP\finacplus-devops-pipeline-local.tar desktop-control-plane:/tmp/finacplus-devops-pipeline-local.tar
+docker exec desktop-control-plane ctr -n k8s.io images import /tmp/finacplus-devops-pipeline-local.tar
+kubectl kustomize k8s/overlays/dev > $env:TEMP\finacplus-rendered.yaml
+python scripts\set_image.py $env:TEMP\finacplus-rendered.yaml finacplus-devops-pipeline finacplus-devops-pipeline:local $sha > $env:TEMP\finacplus-local.yaml
+kubectl apply -f $env:TEMP\finacplus-local.yaml
+kubectl -n finacplus-devops rollout status deployment/finacplus-devops-pipeline
+kubectl -n finacplus-devops port-forward svc/finacplus-devops-pipeline 8080:80
+```
+
 Example with minikube:
 
 ```bash
@@ -204,6 +219,8 @@ kubectl -n finacplus-devops port-forward svc/finacplus-devops-pipeline 8080:80
 curl http://127.0.0.1:8080/healthz
 curl http://127.0.0.1:8080/version
 ```
+
+Note: the HPA resource can show CPU metrics as `<unknown>` on local clusters without Metrics Server. That does not block Deployment rollout or Service verification.
 
 ## K. What Requires External Infrastructure
 

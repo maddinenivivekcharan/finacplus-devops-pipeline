@@ -18,6 +18,9 @@ def assert_true(condition: bool, message: str):
 
 
 def main() -> int:
+    base_kustomization = load_yaml(K8S_ROOT / "base" / "kustomization.yaml")[0]
+    assert_true(base_kustomization.get("namespace") == "finacplus-devops", "base kustomization namespace missing")
+
     docs = []
     for path in sorted(K8S_ROOT.rglob("*.yaml")):
         docs.extend((path, doc) for doc in load_yaml(path))
@@ -39,6 +42,8 @@ def main() -> int:
         assert_true(container.get("livenessProbe"), "Deployment missing livenessProbe")
         assert_true(security.get("allowPrivilegeEscalation") is False, "container can escalate privileges")
         assert_true(security.get("runAsNonRoot") is True, "container must run as non-root")
+        assert_true(security.get("runAsUser") == 10001, "container must use numeric non-root UID")
+        assert_true(security.get("runAsGroup") == 10001, "container must use numeric non-root GID")
         assert_true("requests" in container.get("resources", {}), "resources.requests missing")
         assert_true("limits" in container.get("resources", {}), "resources.limits missing")
 

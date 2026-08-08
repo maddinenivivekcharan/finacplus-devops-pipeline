@@ -4,7 +4,7 @@ This file records reproducible validation for the repository. It is factual and 
 
 ## Executed Successfully Locally
 
-Environment used: Windows PowerShell, Python 3.14.6, kubectl v1.36.0 client, Git 2.54.0.
+Environment used: Windows PowerShell, Python 3.14.6, kubectl v1.36.0 client, Git 2.54.0, Docker 29.4.1, Docker Desktop Kubernetes context `docker-desktop`.
 
 ```powershell
 $env:PYTHONPATH = "src"
@@ -26,6 +26,11 @@ Latest local results:
 - Python compilation: passed
 - Kustomize render for `dev`: passed
 - Kustomize render for `prod`: passed
+- Docker image build: passed with `finacplus-devops-pipeline:local`
+- Docker container endpoint checks: `/healthz`, `/readyz`, `/version`, and `/metrics` passed
+- Docker Desktop Kubernetes deployment: rollout passed
+- Kubernetes Service endpoint checks: `/healthz`, `/readyz`, `/version`, and `/metrics` passed through `svc/finacplus-devops-pipeline`
+- Deployed `/version` reported the Git SHA used for the build
 
 ## Helper Script Validation
 
@@ -37,9 +42,6 @@ A focused repository scan was run for common credential patterns such as GitHub 
 
 ## Not Executed Locally
 
-- Docker image build: Docker CLI is installed, but the Docker daemon was not running locally.
-- Container health check: requires successful Docker build/run.
-- Live Kubernetes deployment: no Kubernetes cluster/kubeconfig is configured locally.
 - Jenkins job execution: requires a Jenkins controller and configured agents/credentials.
 - GitHub webhook trigger: requires a pushed GitHub repository and publicly reachable Jenkins webhook endpoint.
 - Registry push: requires real registry credentials.
