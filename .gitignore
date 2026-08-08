@@ -6,12 +6,17 @@ __pycache__/
 htmlcov/
 .env
 *.log
+*.tar
 dist/
 build/
 .idea/
 .vscode/
 .DS_Store
 kubeconfig*
+credentials*
+*credential*
+*token*
+*password*
 *.pem
 *.key
 id_rsa*

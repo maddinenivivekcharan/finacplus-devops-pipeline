@@ -9,4 +9,12 @@ k8s
 scripts
 *.md
 *.log
+*.tar
 .env
+*.pem
+*.key
+kubeconfig*
+credentials*
+*credential*
+*token*
+*password*
