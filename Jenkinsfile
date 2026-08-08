@@ -19,7 +19,6 @@ pipeline {
 
   environment {
     APP_NAME = 'finacplus-devops-pipeline'
-    DOCKER_BUILDKIT = '1'
     KUBECONFIG_CREDENTIALS_ID = 'kubeconfig-finacplus'
   }
 
