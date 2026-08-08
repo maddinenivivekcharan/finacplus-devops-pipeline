@@ -180,6 +180,7 @@ Parameters:
 - `KUSTOMIZE_OVERLAY`: `dev` or `prod`
 - `PUSH_IMAGE`: true when pushing to a registry
 - `DEPLOY_TO_K8S`: true only when `PUSH_IMAGE` is also true
+- `REGISTRY_CREDENTIALS_ID`: username/password credential for authenticated registries; leave blank only for a trusted local no-auth registry
 
 The pipeline fails early if `DEPLOY_TO_K8S=true` and `PUSH_IMAGE=false`.
 
@@ -225,9 +226,9 @@ Note: the HPA resource can show CPU metrics as `<unknown>` on local clusters wit
 ## K. What Requires External Infrastructure
 
 - GitHub webhook delivery requires a pushed GitHub repository and reachable Jenkins endpoint.
-- Jenkins execution requires a Jenkins controller and agent.
+- Jenkins execution requires a Jenkins controller and agent; local validation used a controller container with Docker and kubectl available.
 - Docker build/run requires Docker daemon access.
-- Registry push requires real registry credentials.
+- Authenticated registry push requires real registry credentials. Local validation used a trusted no-auth registry on `127.0.0.1:5000`.
 - Kubernetes deployment requires a live cluster and kubeconfig.
 - The cluster must be able to pull the pushed image.
 

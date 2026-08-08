@@ -1,6 +1,6 @@
 # Validation
 
-This file records reproducible validation for the repository. It is factual and does not claim that external infrastructure was tested locally.
+This file records reproducible validation for the repository. It distinguishes local execution from steps that still require external GitHub/Jenkins network access.
 
 ## Executed Successfully Locally
 
@@ -31,6 +31,10 @@ Latest local results:
 - Docker Desktop Kubernetes deployment: rollout passed
 - Kubernetes Service endpoint checks: `/healthz`, `/readyz`, `/version`, and `/metrics` passed through `svc/finacplus-devops-pipeline`
 - Deployed `/version` reported the Git SHA used for the build
+- Local Jenkins execution: passed using a Jenkins controller container, Docker socket access, local registry `127.0.0.1:5000`, and Docker Desktop Kubernetes
+- Jenkins pipeline stages executed successfully: checkout, parameter validation, test, Kubernetes validation, Docker build, registry push, Kubernetes deploy, rollout verification
+- Final Jenkins-deployed Git SHA: `4f1b0b1cdb1fa7b4e9257d03417b01773438464f`
+- Final deployed image: `127.0.0.1:5000/finacplus/devops-pipeline:4f1b0b1cdb1fa7b4e9257d03417b01773438464f`
 
 ## Helper Script Validation
 
@@ -42,13 +46,12 @@ A focused repository scan was run for common credential patterns such as GitHub 
 
 ## Not Executed Locally
 
-- Jenkins job execution: requires a Jenkins controller and configured agents/credentials.
-- GitHub webhook trigger: requires a pushed GitHub repository and publicly reachable Jenkins webhook endpoint.
-- Registry push: requires real registry credentials.
+- GitHub webhook delivery from github.com to Jenkins: requires a publicly reachable Jenkins webhook endpoint and a configured GitHub repository webhook.
+- Push to an authenticated external registry: local validation used a trusted no-auth registry on `127.0.0.1:5000`; production use should keep `REGISTRY_CREDENTIALS_ID` set to a Jenkins username/password credential.
 
 ## External Validation Required
 
-To prove the complete case study end to end, run the Jenkins pipeline with:
+To prove the public GitHub-triggered case study end to end, run the Jenkins pipeline with:
 
 - a real Git repository webhook,
 - a Docker-capable Jenkins agent,

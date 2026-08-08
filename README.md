@@ -133,6 +133,7 @@ Important parameters:
 | `KUSTOMIZE_OVERLAY` | `dev` or `prod` |
 | `PUSH_IMAGE` | Push the image after build |
 | `DEPLOY_TO_K8S` | Deploy after the image has been pushed |
+| `REGISTRY_CREDENTIALS_ID` | Registry credential ID; leave blank only for a trusted local no-auth registry |
 
 Safety rule: `DEPLOY_TO_K8S=true` requires `PUSH_IMAGE=true`. This prevents deploying an image tag that only exists on the Jenkins agent.
 
