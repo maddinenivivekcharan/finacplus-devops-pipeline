@@ -39,9 +39,7 @@ spec:
                 name: finacplus-devops-config
           env:
             - name: BUILD_SHA
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.labels['app.kubernetes.io/version']
+              value: unknown
           readinessProbe:
             httpGet:
               path: /readyz

@@ -4,6 +4,7 @@ from pathlib import Path
 
 
 REQUIRED_STAGES = [
+    "Validate Parameters",
     "Checkout",
     "Install and Test",
     "Validate Configuration",
@@ -23,6 +24,7 @@ def main() -> int:
         "has parameterized overlay": "KUSTOMIZE_OVERLAY" in text,
         "has guarded deploy": "DEPLOY_TO_K8S" in text,
         "has guarded image push": "PUSH_IMAGE" in text,
+        "prevents deploy without push": "DEPLOY_TO_K8S requires PUSH_IMAGE=true" in text,
         "has post failure feedback": "post {" in text and "failure {" in text,
     }
     failed = missing + [name for name, ok in checks.items() if not ok]
