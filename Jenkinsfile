@@ -104,9 +104,9 @@ pipeline {
           if (params.REGISTRY_CREDENTIALS_ID?.trim()) {
             withCredentials([usernamePassword(credentialsId: params.REGISTRY_CREDENTIALS_ID, usernameVariable: 'REGISTRY_USER', passwordVariable: 'REGISTRY_PASSWORD')]) {
               sh '''
-                echo "${REGISTRY_PASSWORD}" | docker login "${IMAGE_REGISTRY}" --username "${REGISTRY_USER}" --password-stdin
+                echo "${REGISTRY_PASSWORD}" | docker login "${EFFECTIVE_IMAGE_REGISTRY}" --username "${REGISTRY_USER}" --password-stdin
                 docker push "${IMAGE_TAG}"
-                docker logout "${IMAGE_REGISTRY}"
+                docker logout "${EFFECTIVE_IMAGE_REGISTRY}"
               '''
             }
           } else {

@@ -9,7 +9,7 @@ This guide explains how to run, test, build, deploy, and demonstrate the FinacPl
 - Docker Desktop or another running Docker daemon
 - kubectl
 - A Kubernetes cluster for live deployment, such as minikube, kind, GKE, EKS, AKS, or an existing lab cluster
-- Jenkins with Pipeline, Git integration, Credentials Binding, and a Docker-capable Linux agent
+- Jenkins with Pipeline, Git integration, GitHub plugin, Credentials Binding, and a Docker-capable Linux agent
 - A container registry reachable by the Kubernetes cluster
 - GitHub repository access for webhook-based triggering
 
@@ -168,6 +168,7 @@ Required configuration:
 - SCM: this Git repository
 - Script path: `Jenkinsfile`
 - Agent: Linux worker with Python, Docker, and kubectl
+- Trigger: GitHub hook trigger for GitScm polling, provided by the Jenkins GitHub plugin and declared in `Jenkinsfile`
 - Credentials:
   - `container-registry-credentials`: username/password for the registry
   - `kubeconfig-finacplus`: secret file containing kubeconfig for the target cluster

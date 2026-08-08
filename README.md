@@ -112,6 +112,7 @@ Required Jenkins capabilities:
 
 - Pipeline
 - Git integration
+- GitHub plugin for `githubPush()` webhook triggers
 - Docker-capable Linux agent
 - Credentials Binding
 - `kubectl` available on the deploying agent

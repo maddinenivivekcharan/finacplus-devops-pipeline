@@ -33,8 +33,8 @@ Latest local results:
 - Deployed `/version` reported the Git SHA used for the build
 - Local Jenkins execution: passed using a Jenkins controller container, Docker socket access, local registry `127.0.0.1:5000`, and Docker Desktop Kubernetes
 - Jenkins pipeline stages executed successfully: checkout, parameter validation, test, Kubernetes validation, Docker build, registry push, Kubernetes deploy, rollout verification
-- Final Jenkins-deployed Git SHA: `4f1b0b1cdb1fa7b4e9257d03417b01773438464f`
-- Final deployed image: `127.0.0.1:5000/finacplus/devops-pipeline:4f1b0b1cdb1fa7b4e9257d03417b01773438464f`
+- Jenkins-deployed Git SHA matched `git rev-parse HEAD` at execution time.
+- Jenkins-deployed image used the same Git SHA as the Docker tag and Kubernetes `BUILD_SHA`.
 
 ## Helper Script Validation
 
