@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - service-account.yaml
+  - deployment.yaml
+  - service.yaml
+  - hpa.yaml
+  - network-policy.yaml
+  - monitoring.yaml
+configMapGenerator:
+  - name: finacplus-devops-config
+    literals:
+      - APP_ENV=base
+      - SERVICE_NAME=finacplus-devops-pipeline
+generatorOptions:
+  disableNameSuffixHash: true

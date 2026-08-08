@@ -1,0 +1,35 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: finacplus-devops-pipeline
+  namespace: finacplus-devops
+  labels:
+    app.kubernetes.io/name: finacplus-devops-pipeline
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: finacplus-devops-pipeline
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: finacplus-devops-pipeline
+  namespace: finacplus-devops
+  labels:
+    app.kubernetes.io/name: finacplus-devops-pipeline
+spec:
+  groups:
+    - name: finacplus-devops-pipeline.rules
+      rules:
+        - alert: FinacplusDevopsPipelineDown
+          expr: finacplus_app_up == 0
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: FinacPlus DevOps pipeline app is down
+            description: The app health metric has reported down for more than two minutes.
