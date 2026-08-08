@@ -59,7 +59,8 @@ pipeline {
     stage('Install and Test') {
       steps {
         sh '''
-          python -m venv .venv
+          PYTHON_BIN="$(command -v python3 || command -v python)"
+          "${PYTHON_BIN}" -m venv .venv
           . .venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
