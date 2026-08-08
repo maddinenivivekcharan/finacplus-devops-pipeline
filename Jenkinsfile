@@ -7,6 +7,10 @@ pipeline {
     timeout(time: 30, unit: 'MINUTES')
   }
 
+  triggers {
+    githubPush()
+  }
+
   parameters {
     string(name: 'IMAGE_REGISTRY', defaultValue: 'registry.example.com', description: 'Container registry host.')
     string(name: 'IMAGE_REPOSITORY', defaultValue: 'finacplus/devops-pipeline', description: 'Repository path in the registry.')
