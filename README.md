@@ -144,7 +144,7 @@ Jenkins reads the real commit with `git rev-parse HEAD`, uses that SHA as the Do
 
 ## Validation Status
 
-See [docs/validation.md](docs/validation.md) for commands run locally, passing results, and items that require external infrastructure.
+See [docs/validation.md](docs/validation.md) for commands run locally, passing results, GitHub webhook validation evidence, and items that require production infrastructure.
 
 ## Full Run Guide
 

@@ -35,6 +35,11 @@ Latest local results:
 - Jenkins pipeline stages executed successfully: checkout, parameter validation, test, Kubernetes validation, Docker build, registry push, Kubernetes deploy, rollout verification
 - Jenkins-deployed Git SHA matched `git rev-parse HEAD` at execution time.
 - Jenkins-deployed image used the same Git SHA as the Docker tag and Kubernetes `BUILD_SHA`.
+- GitHub webhook execution: passed using a temporary HTTPS tunnel to local Jenkins
+- GitHub webhook delivery: push event returned HTTP 200
+- Webhook-triggered Jenkins build: Build #8, caused by `Started by GitHub push by maddinenivivekcharan`
+- Webhook-triggered commit: `13ab01c3aa1331e36e59c74651a22bf8e5d9fff5`
+- Webhook-triggered image: `127.0.0.1:5000/finacplus/devops-pipeline:13ab01c3aa1331e36e59c74651a22bf8e5d9fff5`
 
 ## Helper Script Validation
 
@@ -46,16 +51,15 @@ A focused repository scan was run for common credential patterns such as GitHub 
 
 ## Not Executed Locally
 
-- GitHub webhook delivery from github.com to Jenkins: requires a publicly reachable Jenkins webhook endpoint and a configured GitHub repository webhook.
 - Push to an authenticated external registry: local validation used a trusted no-auth registry on `127.0.0.1:5000`; production use should keep `REGISTRY_CREDENTIALS_ID` set to a Jenkins username/password credential.
 
 ## External Validation Required
 
-To prove the public GitHub-triggered case study end to end, run the Jenkins pipeline with:
+For a production-like environment, repeat the same flow with:
 
-- a real Git repository webhook,
+- a stable Jenkins URL instead of a temporary tunnel,
 - a Docker-capable Jenkins agent,
-- a reachable container registry,
+- an authenticated external registry,
 - `container-registry-credentials`,
 - `kubeconfig-finacplus`,
 - and a Kubernetes cluster that can pull the pushed image.

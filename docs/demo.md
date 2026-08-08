@@ -30,7 +30,7 @@ Use this flow if FinacPlus asks for a live demonstration.
    ```
 
 4. Show GitHub webhook delivery succeeded.
-5. Show Jenkins started from the push event.
+5. Show Jenkins started from the push event. In local validation, Build #8 was caused by `Started by GitHub push by maddinenivivekcharan`.
 6. In Jenkins, show these stages:
    - `Validate Parameters`
    - `Checkout`
