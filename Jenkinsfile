@@ -14,12 +14,12 @@ pipeline {
     choice(name: 'KUSTOMIZE_OVERLAY', choices: ['dev', 'prod'], description: 'Kubernetes overlay to deploy.')
     booleanParam(name: 'PUSH_IMAGE', defaultValue: false, description: 'Push image to registry. Requires registry credentials.')
     booleanParam(name: 'DEPLOY_TO_K8S', defaultValue: false, description: 'Deploy to Kubernetes. Requires kubeconfig credentials.')
+    string(name: 'REGISTRY_CREDENTIALS_ID', defaultValue: 'container-registry-credentials', description: 'Jenkins username/password credential ID for authenticated registries. Leave blank only for a trusted local no-auth registry.')
   }
 
   environment {
     APP_NAME = 'finacplus-devops-pipeline'
     DOCKER_BUILDKIT = '1'
-    REGISTRY_CREDENTIALS_ID = 'container-registry-credentials'
     KUBECONFIG_CREDENTIALS_ID = 'kubeconfig-finacplus'
   }
 
@@ -88,12 +88,21 @@ pipeline {
     stage('Push Image') {
       when { expression { return params.PUSH_IMAGE } }
       steps {
-        withCredentials([usernamePassword(credentialsId: env.REGISTRY_CREDENTIALS_ID, usernameVariable: 'REGISTRY_USER', passwordVariable: 'REGISTRY_PASSWORD')]) {
-          sh '''
-            echo "${REGISTRY_PASSWORD}" | docker login "${IMAGE_REGISTRY}" --username "${REGISTRY_USER}" --password-stdin
-            docker push "${IMAGE_TAG}"
-            docker logout "${IMAGE_REGISTRY}"
-          '''
+        script {
+          if (params.REGISTRY_CREDENTIALS_ID?.trim()) {
+            withCredentials([usernamePassword(credentialsId: params.REGISTRY_CREDENTIALS_ID, usernameVariable: 'REGISTRY_USER', passwordVariable: 'REGISTRY_PASSWORD')]) {
+              sh '''
+                echo "${REGISTRY_PASSWORD}" | docker login "${IMAGE_REGISTRY}" --username "${REGISTRY_USER}" --password-stdin
+                docker push "${IMAGE_TAG}"
+                docker logout "${IMAGE_REGISTRY}"
+              '''
+            }
+          } else {
+            sh '''
+              echo "Pushing to no-auth registry ${IMAGE_REGISTRY}"
+              docker push "${IMAGE_TAG}"
+            '''
+          }
         }
       }
     }
